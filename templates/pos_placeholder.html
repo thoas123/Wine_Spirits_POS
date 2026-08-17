@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}POS - Trevor and Jed Wines & Spirits POS{% endblock %}
+{% block page_title %}POS{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Point of Sale</h1>
+        <p class="page-sub">Scan or choose products, then complete checkout.</p>
+    </div>
+    <span class="status-pill">Cashier mode</span>
+</div>
+
+<div class="pos-grid">
+    <section class="panel pos-products">
+        <div class="scan-row">
+            <input type="search" placeholder="Scan barcode or search product">
+            <button class="btn btn-primary btn-inline" type="button">Add</button>
+        </div>
+
+        <div class="cat-chips">
+            <span class="cat-chip active">All</span>
+            <span class="cat-chip">Beer</span>
+            <span class="cat-chip">Whisky</span>
+            <span class="cat-chip">Wine</span>
+            <span class="cat-chip">Vodka</span>
+        </div>
+
+        <div class="product-grid">
+            {% for product in products %}
+            <button class="product-card" type="button">
+                <span class="pname">{{ product.name }}</span>
+                <span class="pprice mono">KES {{ product.selling_price }}</span>
+                <span class="pstock">{{ product.category.name }}</span>
+            </button>
+            {% empty %}
+            <div class="empty-state product-empty">
+                <div class="big">No active products.</div>
+                <div class="small">Add products before running checkout.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <aside class="cart-panel">
+        <div class="cart-head">
+            <div class="t">Current sale</div>
+            <div class="s">Receipt preview</div>
+        </div>
+        <div class="cart-items">
+            <div class="cart-empty">Cart is empty.<br>Scan or tap a product to add it.</div>
+        </div>
+        <div class="cart-totals mono">
+            <div class="tot-row"><span>Subtotal</span><span>KES 0.00</span></div>
+            <div class="tot-row grand"><span>Total</span><span>KES 0.00</span></div>
+        </div>
+        <div class="cart-foot">
+            <button class="btn btn-primary btn-block" type="button" disabled>Checkout</button>
+        </div>
+        <div class="torn"></div>
+    </aside>
+</div>
+{% endblock %}

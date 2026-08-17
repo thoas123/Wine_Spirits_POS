@@ -51,3 +51,34 @@ class User(AbstractUser):
     @property
     def is_cashier(self):
         return self.role == Role.CASHIER
+
+    @property
+    def is_admin_role(self):
+        """Business administrator role; separate from Django is_superuser."""
+        return self.is_administrator
+
+    @property
+    def is_manager_role(self):
+        """Business shop-manager role."""
+        return self.is_shop_manager
+
+    @property
+    def is_cashier_role(self):
+        """Business cashier role."""
+        return self.is_cashier
+
+    @property
+    def role_label(self):
+        return self.get_role_display()
+
+    def get_accessible_shops(self):
+        """Return shops this user may access under business authorization."""
+        from core.authorization import get_accessible_shops
+
+        return get_accessible_shops(self)
+
+    def has_shop_access(self, shop):
+        """Return whether this user may access a specific shop."""
+        from core.authorization import has_shop_access
+
+        return has_shop_access(self, shop)

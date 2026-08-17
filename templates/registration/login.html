@@ -1,32 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}Login — Wine & Spirits POS{% endblock %}
+{% block title %}Login - Trevor and Jed Wines & Spirits POS{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <h1>Login</h1>
+<div class="login-card">
+    <div class="login-brand">
+        <span class="brand-mark">TJ</span>
+        <span class="name">Trevor and Jed Wines & Spirits</span>
+    </div>
 
     {% if form.errors %}
-    <div class="alert alert-error">
-        <p>Invalid username or password. Please try again.</p>
-    </div>
+    <div class="alert alert-error">Invalid username or password. Please try again.</div>
     {% endif %}
 
     <form method="post" action="{% url 'accounts:login' %}">
         {% csrf_token %}
-
         <div class="form-group">
             <label for="id_username">Username</label>
             {{ form.username }}
         </div>
-
         <div class="form-group">
             <label for="id_password">Password</label>
             {{ form.password }}
         </div>
-
         <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
     </form>
+
+    <div class="login-hint">
+        Use the staff account assigned to your shop. Administrators can manage shops, products, inventory, and users.
+    </div>
 </div>
 {% endblock %}

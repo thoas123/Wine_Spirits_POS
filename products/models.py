@@ -118,6 +118,20 @@ class Product(models.Model):
         verbose_name = 'product'
         verbose_name_plural = 'products'
         ordering = ['name']
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(buying_price__gte=0),
+                name='product_buying_price_non_negative',
+            ),
+            models.CheckConstraint(
+                condition=models.Q(selling_price__gte=0),
+                name='product_selling_price_non_negative',
+            ),
+            models.CheckConstraint(
+                condition=models.Q(tax_rate__gte=0),
+                name='product_tax_rate_non_negative',
+            ),
+        ]
 
     def __str__(self):
         if self.brand:

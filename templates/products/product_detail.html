@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Trevor and Jed Wines & Spirits POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ product.name }}</h1>
+        <p class="text-muted">Global product master record.</p>
+    </div>
+    <div class="button-row">
+        <a href="{% url 'products:edit' product.pk %}" class="btn btn-primary btn-inline">Edit</a>
+        {% if product.is_active %}
+            <a href="{% url 'products:deactivate' product.pk %}" class="btn btn-danger btn-inline">Deactivate</a>
+        {% else %}
+            <a href="{% url 'products:activate' product.pk %}" class="btn btn-primary btn-inline">Activate</a>
+        {% endif %}
+    </div>
+</div>
+
+<section class="panel">
+    <dl class="detail-list">
+        <dt>Name</dt><dd>{{ product.name }}</dd>
+        <dt>Brand</dt><dd>{{ product.brand|default:"Not provided" }}</dd>
+        <dt>SKU</dt><dd>{{ product.sku }}</dd>
+        <dt>Category</dt><dd>{{ product.category.name }}</dd>
+        <dt>Buying price</dt><dd>KES {{ product.buying_price }}</dd>
+        <dt>Selling price</dt><dd>KES {{ product.selling_price }}</dd>
+        <dt>Unit</dt><dd>{{ product.get_unit_of_measurement_display }}</dd>
+        <dt>Minimum stock</dt><dd>{{ product.minimum_stock_level }}</dd>
+        <dt>Tax/excise rate</dt><dd>{{ product.tax_rate }}%</dd>
+        <dt>Status</dt>
+        <dd>
+            {% if product.is_active %}
+                <span class="status-badge status-active">Active</span>
+            {% else %}
+                <span class="status-badge status-inactive">Discontinued</span>
+            {% endif %}
+        </dd>
+        <dt>Created</dt><dd>{{ product.created_at }}</dd>
+        <dt>Updated</dt><dd>{{ product.updated_at }}</dd>
+    </dl>
+</section>
+{% endblock %}

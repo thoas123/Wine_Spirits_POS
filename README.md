@@ -1,4 +1,4 @@
-# Wine & Spirits POS
+# Trevor and Jed Wines & Spirits POS
 
 A centralized web-based Point of Sale and Business Management System for a wine and spirits business operating multiple shops.
 

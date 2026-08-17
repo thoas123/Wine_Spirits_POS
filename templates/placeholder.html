@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Trevor and Jed Wines & Spirits POS{% endblock %}
+
+{% block content %}
+<div class="home-placeholder">
+    <h1>{{ title }}</h1>
+    {% if object %}
+        <p>{{ object }}</p>
+    {% else %}
+        <p class="text-muted">Placeholder for a future module.</p>
+    {% endif %}
+</div>
+{% endblock %}

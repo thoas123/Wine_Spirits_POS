@@ -4,46 +4,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Wine & Spirits POS{% endblock %}</title>
+    <title>{% block title %}Trevor and Jed Wines & Spirits POS{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a href="{% url 'core:home' %}">Wine & Spirits POS</a>
-        </div>
-        <div class="navbar-menu">
-            {% if user.is_authenticated %}
-                <span class="navbar-user">{{ user.get_full_name|default:user.username }}</span>
-                <a href="{% url 'accounts:logout' %}" class="navbar-link">Logout</a>
-            {% else %}
-                <a href="{% url 'accounts:login' %}" class="navbar-link">Login</a>
-            {% endif %}
-        </div>
-    </nav>
+    {% if user.is_authenticated %}
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a href="{% url 'core:home' %}" class="side-brand" aria-label="Home">
+                <span class="brand-mark">TJ</span>
+                <span class="brand-name">Trevor and Jed<br>Wines & Spirits</span>
+            </a>
 
-    <!-- Messages -->
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
+            <nav class="side-nav" aria-label="Primary">
+                <a href="{% url 'core:home' %}" class="side-link"><span class="dot"></span>{% if user.is_cashier_role %}POS{% else %}Dashboard{% endif %}</a>
+                {% if user.is_admin_role %}
+                    <a href="{% url 'shops:list' %}" class="side-link"><span class="dot"></span>Shops</a>
+                    <a href="{% url 'products:list' %}" class="side-link"><span class="dot"></span>Products</a>
+                    <a href="{% url 'inventory:list' %}" class="side-link"><span class="dot"></span>Inventory</a>
+                    <a href="{% url 'shops:staff_assignments' %}" class="side-link"><span class="dot"></span>Staff</a>
+                    <span class="side-link muted"><span class="dot"></span>Reports</span>
+                {% elif user.is_manager_role %}
+                    <a href="{% url 'inventory:list' %}" class="side-link"><span class="dot"></span>Inventory</a>
+                    <span class="side-link muted"><span class="dot"></span>Receiving</span>
+                    <span class="side-link muted"><span class="dot"></span>Sales</span>
+                    <span class="side-link muted"><span class="dot"></span>Expenses</span>
+                {% elif user.is_cashier_role %}
+                    <span class="side-link muted"><span class="dot"></span>My sales</span>
+                {% endif %}
+            </nav>
+
+            <div class="side-foot">
+                <div class="side-user">
+                    <div class="who">{{ user.get_full_name|default:user.username }}</div>
+                    <div>{{ user.role_label }}</div>
+                </div>
+                <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="side-link logout-button"><span class="dot"></span>Logout</button>
+                </form>
             </div>
-        {% endfor %}
+        </aside>
+
+        <div class="main-shell">
+            <header class="topbar">
+                <div>
+                    <div class="tb-title">{% block page_title %}Trevor and Jed POS{% endblock %}</div>
+                    <div class="tb-subtitle">Wine and spirits retail operations</div>
+                </div>
+                <div class="tb-right">
+                    <span class="status-pill">Open</span>
+                    <span>{{ user.get_full_name|default:user.username }}</span>
+                </div>
+            </header>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <main class="container">
+    {% else %}
+    <main class="auth-shell">
+        {% if messages %}
+        <div class="messages auth-messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endif %}
+                {% block content %}{% endblock %}
+            </main>
+    {% if user.is_authenticated %}
+        </div>
+
+        <nav class="mobile-nav" aria-label="Mobile primary">
+            <a href="{% url 'core:home' %}" class="mobile-link"><span class="dot"></span>{% if user.is_cashier_role %}POS{% else %}Home{% endif %}</a>
+            {% if user.is_admin_role %}
+                <a href="{% url 'products:list' %}" class="mobile-link"><span class="dot"></span>Products</a>
+                <a href="{% url 'inventory:list' %}" class="mobile-link"><span class="dot"></span>Stock</a>
+                <a href="{% url 'shops:list' %}" class="mobile-link"><span class="dot"></span>Shops</a>
+            {% elif not user.is_cashier_role %}
+                <a href="{% url 'inventory:list' %}" class="mobile-link"><span class="dot"></span>Stock</a>
+            {% endif %}
+        </nav>
     </div>
     {% endif %}
-
-    <!-- Main Content -->
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 Wine & Spirits POS</p>
-    </footer>
 
     {% block extra_js %}{% endblock %}
 </body>

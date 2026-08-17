@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt {{ sale.receipt_number }} - Trevor and Jed Wines & Spirits POS{% endblock %}
+{% block page_title %}Receipt{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ sale.receipt_number }}</h1>
+        <p class="page-sub">{{ sale.shop.name }} - {{ sale.created_at }}</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'sales:pos' %}?shop={{ sale.shop_id }}">New sale</a>
+</div>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sale.items.all %}
+                <tr>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="mono">KES {{ item.unit_price }}</td>
+                    <td class="mono">KES {{ item.line_total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="summary-grid">
+        <div>
+            <div class="label">Subtotal</div>
+            <div class="value mono">KES {{ sale.subtotal }}</div>
+        </div>
+        <div>
+            <div class="label">Tax</div>
+            <div class="value mono">KES {{ sale.tax_amount }}</div>
+        </div>
+        <div>
+            <div class="label">Total</div>
+            <div class="value mono">KES {{ sale.total_amount }}</div>
+        </div>
+    </div>
+</section>
+{% endblock %}

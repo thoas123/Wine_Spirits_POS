@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm {{ action }} - Trevor and Jed Wines & Spirits POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Confirm {{ action }}</h1>
+        <p class="text-muted">Products already in this category will remain intact.</p>
+    </div>
+</div>
+
+<form method="post" class="panel form-panel">
+    {% csrf_token %}
+    <p>Are you sure you want to {{ action }} <strong>{{ category.name }}</strong>?</p>
+    <div class="button-row">
+        <button type="submit" class="btn {% if target_status %}btn-primary{% else %}btn-danger{% endif %} btn-inline">{{ action|capfirst }}</button>
+        <a href="{% url 'products:category_list' %}" class="btn btn-secondary btn-inline">Cancel</a>
+    </div>
+</form>
+{% endblock %}

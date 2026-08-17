@@ -1,11 +1,106 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %}Dashboard - Trevor and Jed Wines &
+Spirits POS{% endblock %} {% block page_title %}Dashboard{% endblock %} {% block
+content %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="page-sub">
+      Sales, stock, shops, and product activity at a glance.
+    </p>
+  </div>
+  <div class="range-tabs">
+    <span class="range-tab active">Today</span>
+    <span class="range-tab">7 days</span>
+    <span class="range-tab">30 days</span>
+  </div>
+</div>
 
-{% block title %}Home — Wine & Spirits POS{% endblock %}
+<section class="stat-grid">
+  <div class="stat-card">
+    <div class="label">Total revenue</div>
+    <div class="value mono">KES {{ total_revenue|default:"0.00" }}</div>
+    <div class="sub">Completed sales on record</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Transactions</div>
+    <div class="value mono">{{ sales_count|default:"0" }}</div>
+    <div class="sub">Receipts captured</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Products</div>
+    <div class="value mono">{{ product_count|default:"0" }}</div>
+    <div class="sub">Active product master</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Low stock</div>
+    <div class="value mono">{{ low_stock_count|default:"0" }}</div>
+    <div class="sub">Inventory lines need attention</div>
+  </div>
+</section>
 
-{% block content %}
-<div class="home-placeholder">
-    <h1>Wine &amp; Spirits POS</h1>
-    <p>Welcome, {{ user.get_full_name|default:user.username }}.</p>
-    <p class="text-muted">Dashboard will be implemented in a future step.</p>
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2>Recent Sales</h2>
+    <table class="data-table compact">
+      <thead>
+        <tr>
+          <th>Receipt</th>
+          <th>Shop</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sale in recent_sales %}
+        <tr>
+          <td>{{ sale.receipt_number }}</td>
+          <td>{{ sale.shop.name }}</td>
+          <td>KES {{ sale.total_amount }}</td>
+          <td>
+            <span class="status-badge status-active"
+              >{{ sale.get_status_display }}</span
+            >
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="empty-state">
+            No sales have been recorded yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>Stock Watch</h2>
+    <table class="data-table compact">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Shop</th>
+          <th>Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in stock_watch %}
+        <tr>
+          <td>{{ item.product.name }}</td>
+          <td>{{ item.shop.name }}</td>
+          <td>
+            <span class="status-badge status-low_stock"
+              >{{ item.quantity }}</span
+            >
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="empty-state">No stock alerts.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 </div>
 {% endblock %}

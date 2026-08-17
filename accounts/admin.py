@@ -2,6 +2,15 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import User
+from shops.models import ShopAssignment
+
+
+class ShopAssignmentInline(admin.TabularInline):
+    model = ShopAssignment
+    extra = 0
+    fields = ('shop', 'is_active', 'assigned_at')
+    readonly_fields = ('assigned_at',)
+    autocomplete_fields = ('shop',)
 
 
 @admin.register(User)
@@ -17,6 +26,7 @@ class UserAdmin(BaseUserAdmin):
     )
     list_filter = BaseUserAdmin.list_filter + ('role',)
     search_fields = ('username', 'email', 'first_name', 'last_name', 'phone_number')
+    inlines = (ShopAssignmentInline,)
 
     # Add role and phone_number to the user edit form
     fieldsets = BaseUserAdmin.fieldsets + (

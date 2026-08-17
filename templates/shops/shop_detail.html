@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}{{ shop.name }} - Trevor and Jed Wines & Spirits POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ shop.name }}</h1>
+        <p class="text-muted">Shop profile and staff summary.</p>
+    </div>
+    <div class="button-row">
+        <a href="{% url 'shops:edit' shop.pk %}" class="btn btn-primary btn-inline">Edit</a>
+        <a href="{% url 'shops:staff' shop.pk %}" class="btn btn-secondary btn-inline">Manage staff</a>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <section class="panel">
+        <h2>Shop Information</h2>
+        <dl class="detail-list">
+            <dt>Location</dt><dd>{{ shop.location }}</dd>
+            <dt>Phone</dt><dd>{{ shop.phone|default:"Not provided" }}</dd>
+            <dt>Email</dt><dd>{{ shop.email|default:"Not provided" }}</dd>
+            <dt>Licence number</dt><dd>{{ shop.licence_number|default:"Not provided" }}</dd>
+            <dt>Licence expiry</dt><dd>{{ shop.licence_expiry|default:"Not provided" }}</dd>
+            <dt>Licence status</dt><dd><span class="status-badge status-{{ licence_status.code }}">{{ licence_status.label }}</span></dd>
+            <dt>Status</dt>
+            <dd>
+                {% if shop.is_active %}
+                    <span class="status-badge status-active">Active</span>
+                {% else %}
+                    <span class="status-badge status-inactive">Inactive</span>
+                {% endif %}
+            </dd>
+            <dt>Created</dt><dd>{{ shop.created_at }}</dd>
+            <dt>Updated</dt><dd>{{ shop.updated_at }}</dd>
+        </dl>
+
+        <div class="button-row">
+            {% if shop.is_active %}
+                <a href="{% url 'shops:deactivate' shop.pk %}" class="btn btn-danger btn-inline">Deactivate</a>
+            {% else %}
+                <a href="{% url 'shops:activate' shop.pk %}" class="btn btn-primary btn-inline">Activate</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Staff Summary</h2>
+        <div class="summary-row">
+            <div><strong>{{ manager_count }}</strong><span>Managers</span></div>
+            <div><strong>{{ cashier_count }}</strong><span>Cashiers</span></div>
+            <div><strong>{{ assignments.count }}</strong><span>Total assigned</span></div>
+        </div>
+
+        <table class="data-table compact">
+            <thead>
+                <tr><th>User</th><th>Role</th><th>Assigned</th></tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                    <tr>
+                        <td>{{ assignment.user.get_full_name|default:assignment.user.username }}</td>
+                        <td>{{ assignment.user.role_label }}</td>
+                        <td>{{ assignment.assigned_at }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3" class="empty-state">No staff assigned.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

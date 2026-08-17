@@ -1,11 +1,16 @@
 from decimal import Decimal
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.urls import reverse
 
-from accounts.models import User
+from accounts.models import Role, User
+from inventory.models import ShopInventory
 from products.models import Category, Product
-from shops.models import Shop
+from shops.models import Shop, ShopAssignment
 from sales.models import Sale, SaleItem, SaleStatus, Payment, PaymentMethod
+
+
+FAST_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 
 class SaleModelTests(TestCase):
@@ -167,3 +172,71 @@ class PaymentModelTests(TestCase):
         )
         self.assertIn('M-Pesa', str(payment))
         self.assertIn('3000', str(payment))
+
+
+@override_settings(PASSWORD_HASHERS=FAST_HASHERS)
+class SalesViewTests(TestCase):
+    password = 'test-password'
+
+    def setUp(self):
+        self.cashier = User.objects.create_user(
+            username='cashier-view',
+            password=self.password,
+            role=Role.CASHIER,
+        )
+        self.shop = Shop.objects.create(name='Counter Shop', location='Nairobi')
+        ShopAssignment.objects.create(user=self.cashier, shop=self.shop)
+        self.category = Category.objects.create(name='Wine')
+        self.product = Product.objects.create(
+            name='House Red',
+            brand='Mouline',
+            category=self.category,
+            sku='RED-001',
+            buying_price=Decimal('700.00'),
+            selling_price=Decimal('1000.00'),
+            tax_rate=Decimal('0.00'),
+        )
+        self.inventory = ShopInventory.objects.create(
+            shop=self.shop,
+            product=self.product,
+            quantity=5,
+        )
+
+    def login_cashier(self):
+        self.client.login(username='cashier-view', password=self.password)
+
+    def test_cashier_can_view_pos(self):
+        self.login_cashier()
+        response = self.client.get(reverse('sales:pos'), {'shop': self.shop.pk})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'House Red')
+
+    def test_cashier_can_complete_sale_from_pos(self):
+        self.login_cashier()
+        response = self.client.post(
+            reverse('sales:pos'),
+            {
+                'shop': self.shop.pk,
+                'product_id': [self.product.pk],
+                'quantity': ['2'],
+                'payment_method': PaymentMethod.CASH,
+                'amount_received': '2000.00',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        sale = Sale.objects.get()
+        self.assertEqual(sale.total_amount, Decimal('2000.00'))
+        self.inventory.refresh_from_db()
+        self.assertEqual(self.inventory.quantity, 3)
+
+    def test_cashier_can_view_authorized_receipt(self):
+        sale = Sale.objects.create(
+            receipt_number='RCP-VIEW-001',
+            shop=self.shop,
+            cashier=self.cashier,
+            total_amount=Decimal('1000.00'),
+        )
+        self.login_cashier()
+        response = self.client.get(reverse('sales:receipt', args=[sale.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'RCP-VIEW-001')

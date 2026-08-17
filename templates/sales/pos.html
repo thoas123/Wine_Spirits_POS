@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}POS - Trevor and Jed Wines & Spirits POS{% endblock %}
+{% block page_title %}Point of Sale{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Point of Sale</h1>
+        <p class="page-sub">Select a shop, add sale lines, and complete checkout.</p>
+    </div>
+</div>
+
+<form method="get" class="filter-bar">
+    <div class="field">
+        <label for="shop">Shop</label>
+        <select id="shop" name="shop" onchange="this.form.submit()">
+            <option value="">Choose shop</option>
+            {% for shop in shops %}
+                <option value="{{ shop.pk }}" {% if selected_shop.pk == shop.pk %}selected{% endif %}>{{ shop.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+<form method="post" class="panel">
+    {% csrf_token %}
+    {% if selected_shop %}
+        <input type="hidden" name="shop" value="{{ selected_shop.pk }}">
+    {% endif %}
+
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Available</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inventory in inventories %}
+                <tr>
+                    <td>
+                        <div class="strong">{{ inventory.product.name }}</div>
+                        <div class="muted-text mono">KES {{ inventory.product.selling_price }}</div>
+                        <input type="hidden" name="product_id" value="{{ inventory.product_id }}">
+                    </td>
+                    <td>{{ inventory.quantity }}</td>
+                    <td><input type="number" name="quantity" min="0" max="{{ inventory.quantity }}" value="0"></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="empty-row">Choose a shop with available stock.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-grid">
+        <div class="field">
+            <label for="payment_method">Payment method</label>
+            <select id="payment_method" name="payment_method">
+                {% for value, label in payment_methods %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="amount_received">Cash received</label>
+            <input id="amount_received" name="amount_received" type="number" min="0" step="0.01">
+        </div>
+        <div class="field">
+            <label for="reference_number">Reference</label>
+            <input id="reference_number" name="reference_number" type="text">
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-primary" type="submit" {% if not selected_shop %}disabled{% endif %}>Complete sale</button>
+    </div>
+</form>
+{% endblock %}

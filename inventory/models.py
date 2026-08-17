@@ -91,6 +91,10 @@ class ShopInventory(models.Model):
                 fields=['shop', 'product'],
                 name='unique_shop_product_inventory',
             ),
+            models.CheckConstraint(
+                condition=models.Q(quantity__gte=0),
+                name='shop_inventory_quantity_non_negative',
+            ),
         ]
         ordering = ['shop__name', 'product__name']
 
@@ -103,6 +107,12 @@ class ShopInventory(models.Model):
         if self.minimum_stock_level is not None:
             return self.minimum_stock_level
         return self.product.minimum_stock_level
+
+    @property
+    def stock_status(self):
+        from .services import get_stock_status
+
+        return get_stock_status(self.quantity, self.effective_minimum_stock)
 
 
 class MovementType(models.TextChoices):
@@ -174,6 +184,12 @@ class InventoryMovement(models.Model):
         verbose_name = 'inventory movement'
         verbose_name_plural = 'inventory movements'
         ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(balance_after__gte=0),
+                name='inventory_movement_balance_after_non_negative',
+            ),
+        ]
         indexes = [
             models.Index(
                 fields=['shop', 'product', '-created_at'],

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory - Trevor and Jed Wines & Spirits POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Inventory</h1>
+        <p class="text-muted">Shop-specific stock balances and low-stock status.</p>
+    </div>
+    <div class="button-row">
+        {% if can_adjust_inventory %}
+            <a href="{% url 'inventory:adjust' %}" class="btn btn-primary btn-inline">Manual adjustment</a>
+        {% endif %}
+        {% if not user.is_cashier_role %}
+            <a href="{% url 'inventory:movement_list' %}" class="btn btn-secondary btn-inline">Movements</a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="get" class="filter-bar inventory-filter-bar">
+    <div class="form-group">
+        <label for="id_q">Search</label>
+        <input id="id_q" type="search" name="q" value="{{ filters.q }}" placeholder="Product, brand, or SKU">
+    </div>
+    <div class="form-group">
+        <label for="id_shop">Shop</label>
+        <select id="id_shop" name="shop">
+            <option value="">All accessible</option>
+            {% for shop in shops %}
+                <option value="{{ shop.pk }}" {% if filters.shop == shop.pk|stringformat:"s" %}selected{% endif %}>{{ shop.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="id_category">Category</label>
+        <select id="id_category" name="category">
+            <option value="">All</option>
+            {% for category in categories %}
+                <option value="{{ category.pk }}" {% if filters.category == category.pk|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="id_status">Stock</label>
+        <select id="id_status" name="status">
+            <option value="">All</option>
+            {% for value,label in stock_status_options %}
+                <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="id_product_status">Product</label>
+        <select id="id_product_status" name="product_status">
+            <option value="">All</option>
+            <option value="active" {% if filters.product_status == "active" %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if filters.product_status == "inactive" %}selected{% endif %}>Discontinued</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Shop</th>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Minimum</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inventory in page_obj.object_list %}
+                <tr>
+                    <td>{{ inventory.shop.name }}</td>
+                    <td>{{ inventory.product.name }}</td>
+                    <td>{{ inventory.product.sku }}</td>
+                    <td>{{ inventory.product.category.name }}</td>
+                    <td>{{ inventory.quantity }}</td>
+                    <td>{{ inventory.effective_minimum_stock }}</td>
+                    <td><span class="status-badge status-{{ inventory.stock_status_code }}">{{ inventory.stock_status_label }}</span></td>
+                    <td>{{ inventory.updated_at }}</td>
+                    <td class="actions">
+                        <a href="{% url 'inventory:detail' inventory.pk %}">View</a>
+                        {% if can_adjust_inventory %}
+                            <a href="{% url 'inventory:adjust_inventory' inventory.pk %}">Adjust</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="9" class="empty-state">No inventory records found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "includes/pagination.html" %}
+{% endblock %}

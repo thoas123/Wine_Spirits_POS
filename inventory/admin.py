@@ -25,6 +25,13 @@ class ShopInventoryAdmin(admin.ModelAdmin):
     list_filter = ('shop',)
     search_fields = ('product__name', 'product__sku', 'shop__name')
     list_select_related = ('shop', 'product')
+    readonly_fields = ('shop', 'product', 'quantity', 'created_at', 'updated_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(InventoryMovement)
@@ -37,6 +44,19 @@ class InventoryMovementAdmin(admin.ModelAdmin):
     search_fields = ('product__name', 'product__sku', 'reference')
     list_select_related = ('shop', 'product', 'created_by')
     date_hierarchy = 'created_at'
+    readonly_fields = (
+        'shop', 'product', 'movement_type', 'quantity',
+        'balance_after', 'reference', 'notes', 'created_by', 'created_at',
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return request.method in ('GET', 'HEAD') and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class StockReceiveItemInline(admin.TabularInline):

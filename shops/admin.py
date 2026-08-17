@@ -18,4 +18,4 @@ class ShopAssignmentAdmin(admin.ModelAdmin):
     list_display = ('user', 'shop', 'assigned_at', 'is_active')
     list_filter = ('is_active', 'shop')
     search_fields = ('user__username', 'user__first_name', 'shop__name')
-    raw_id_fields = ('user',)
+    autocomplete_fields = ('user', 'shop')
